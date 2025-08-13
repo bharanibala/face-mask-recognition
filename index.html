@@ -1,0 +1,89 @@
+<html>
+  <head>
+    <title>Object Detection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/webcam.min.js') }}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
+  <body  >
+    <div class="container bg-white" >
+        <div class="row justify-content-center">
+          <center id="my_camera"></center>
+
+        </div>
+        <div id="res" class="text-center"></div>
+    </div>
+
+
+    <script type="text/javascript">
+      Webcam.set({
+        width: 245,
+        height: 240,
+       image_format: 'jpeg',
+       jpeg_quality: 90
+
+      });
+      Webcam.set('constraints',{
+       facingMode: "environment"
+   });
+      Webcam.attach( '#my_camera' );
+
+      // function take_snapshot() {
+      setInterval(function() {
+       // take snapshot and get image data
+       Webcam.snap( function(data_uri) {
+        // display results in page
+
+        var roll_no='object';
+
+        var formdata = new FormData();
+        formdata.append("webcam", data_uri);
+        formdata.append("roll_no",roll_no);
+
+        $.ajax({
+          url:"https://projects20.000webhostapp.com/Mini_Project/Vignesh/index.php",
+          type:"POST",
+          data:formdata,
+          async: false,
+    			 cache: false,
+    			 contentType: false,
+    			 enctype: 'multipart/form-data',
+    			 processData: false,
+          success:function(res){
+
+              $.ajax({
+                url:"/detect",
+                type:"GET",
+                success:function(res){
+                  $('#res').html(res);
+                  if ('speechSynthesis' in window) {
+                  var u1 = new SpeechSynthesisUtterance(res);
+                  u1.lang = 'en-US';
+                  u1.pitch = 1;
+                  u1.rate = 1;
+                  u1.voiceURI = 'native';
+                  u1.volume = 1;
+                  speechSynthesis.speak(u1);
+                }
+                else{
+                  // Speech Synthesis Not Supported 😣
+                  alert("Sorry, your browser doesn't support text to speech!");
+                }
+
+                }
+              });
+          }
+        });
+
+        });
+
+
+ }, 5000);
+
+    </script>
+  </body>
+</html>
